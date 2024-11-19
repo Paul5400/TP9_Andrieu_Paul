@@ -10,7 +10,7 @@ public class Personne {
     private String prenom;
     private int id;
 
-    public Personne(String nom, String prenom) {
+    public Personne(String nom, String prenom) throws SQLException {
         this.nom = nom;
         this.id = -1;
         this.prenom = prenom;
@@ -32,12 +32,10 @@ public class Personne {
 
     public void save() throws SQLException {
         if (this.id == -1) {
+            saveNew();
+        } else {
+            update();
         }
-        saveNew();
-    } else
-
-    {
-        update();
     }
 
     public void saveNew() throws SQLException {
@@ -55,7 +53,23 @@ public class Personne {
     }
 
     public void update() throws SQLException {
+        Connection connection = DBConnection.getConnection();
+        String query = "UPDATE personne SET prenom = ?, nom = ? WHERE id = ?";
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setString(1, this.prenom);
+        statement.setString(2,this.prenom);
+        statement.setInt(3, this.id);
+        statement.executeUpdate();
 
+    }
+
+    public void delete() throws SQLException {
+        Connection connection = DBConnection.getConnection();
+        String query = "DELETE FROM personne WHERE id = ?";
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setInt(1, this.id);
+        statement.executeUpdate();
+        this.id =-1;
     }
 
 }
