@@ -1,27 +1,60 @@
 package activeRecord;
 
-import java.util.List;
+import activeRecord.DBConnection;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.sql.*;
+import java.util.List;
 
 public class Personne {
-
+    private int id;
     private String nom;
     private String prenom;
-    private int id;
 
-    public Personne(String nom, String prenom) throws SQLException {
-        this.nom = nom;
+    public Personne(String nom, String prenom) {
         this.id = -1;
+        this.nom = nom;
         this.prenom = prenom;
     }
 
     public static List<Personne> findAll() throws SQLException {
-        List<Personne> personnes = new ArrayList<Personne>();
+        List<Personne> personnes = new ArrayList<>();
         Connection connection = DBConnection.getConnection();
         String query = "SELECT * FROM personne";
-        PreparedStatement preparedStatement = connection.prepareStatement(query);
-        ResultSet resultSet = preparedStatement.executeQuery();
+        PreparedStatement statement = connection.prepareStatement(query);
+        ResultSet resultSet = statement.executeQuery();
+        while (resultSet.next()) {
+            Personne p = new Personne(resultSet.getString("nom"), resultSet.getString("prenom"));
+            p.id = resultSet.getInt("id");
+            personnes.add(p);
+        }
+        return personnes;
+    }
+
+    public static Personne findById(int id) throws SQLException {
+        Connection connection = DBConnection.getConnection();
+        String query = "SELECT * FROM personne WHERE id = ?";
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setInt(1, id);
+        ResultSet resultSet = statement.executeQuery();
+        if (resultSet.next()) {
+            Personne p = new Personne(resultSet.getString("nom"), resultSet.getString("prenom"));
+            p.id = resultSet.getInt("id");
+            return p;
+        }
+        return null;
+    }
+
+    public static List<Personne> findByName(String nom) throws SQLException {
+        List<Personne> personnes = new ArrayList<>();
+        Connection connection = DBConnection.getConnection();
+        String query = "SELECT * FROM personne WHERE nom = ?";
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setString(1, nom);
+        ResultSet resultSet = statement.executeQuery();
         while (resultSet.next()) {
             Personne p = new Personne(resultSet.getString("nom"), resultSet.getString("prenom"));
             p.id = resultSet.getInt("id");
@@ -38,38 +71,37 @@ public class Personne {
         }
     }
 
-    public void saveNew() throws SQLException {
+    private void saveNew() throws SQLException {
         Connection connection = DBConnection.getConnection();
-        String query = "INSERT INTO personne(nom, prenom) VALUES (?, ?)";
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.setString(1, nom);
-        statement.setString(2, prenom);
+        String query = "INSERT INTO personne (nom, prenom) VALUES (?, ?)";
+        PreparedStatement statement = connection.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
+        statement.setString(1, this.nom);
+        statement.setString(2, this.prenom);
         statement.executeUpdate();
         ResultSet keys = statement.getGeneratedKeys();
-        while (keys.next()) {
+        if (keys.next()) {
             this.id = keys.getInt(1);
         }
-
     }
 
-    public void update() throws SQLException {
+    private void update() throws SQLException {
         Connection connection = DBConnection.getConnection();
-        String query = "UPDATE personne SET prenom = ?, nom = ? WHERE id = ?";
+        String query = "UPDATE personne SET nom = ?, prenom = ? WHERE id = ?";
         PreparedStatement statement = connection.prepareStatement(query);
-        statement.setString(1, this.prenom);
-        statement.setString(2,this.prenom);
+        statement.setString(1, this.nom);
+        statement.setString(2, this.prenom);
         statement.setInt(3, this.id);
         statement.executeUpdate();
-
     }
 
     public void delete() throws SQLException {
-        Connection connection = DBConnection.getConnection();
-        String query = "DELETE FROM personne WHERE id = ?";
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.setInt(1, this.id);
-        statement.executeUpdate();
-        this.id =-1;
+        if (this.id != -1) {
+            Connection connection = DBConnection.getConnection();
+            String query = "DELETE FROM personne WHERE id = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setInt(1, this.id);
+            statement.executeUpdate();
+            this.id = -1;
+        }
     }
-
 }
