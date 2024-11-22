@@ -20,6 +20,30 @@ public class Personne {
         this.prenom = prenom;
     }
 
+    public String getNom() {
+        return nom;
+    }
+
+    public String getPrenom() {
+        return prenom;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setPrenom(String prenom) {
+        this.prenom = prenom;
+    }
+
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+
     public static List<Personne> findAll() throws SQLException {
         List<Personne> personnes = new ArrayList<>();
         Connection connection = DBConnection.getConnection();

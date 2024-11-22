@@ -9,7 +9,7 @@ public class DBConnection {
     private static Connection connection;
     private static String url = "jdbc:mysql://localhost/testpersonne";
     private static String username = "root";
-    private static String password = "password";
+    private static String password = "";
 
     private DBConnection() throws SQLException {
         Properties prop = new Properties();
