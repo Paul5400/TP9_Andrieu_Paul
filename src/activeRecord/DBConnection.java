@@ -3,6 +3,7 @@ package activeRecord;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class DBConnection {
     private static Connection connection;
@@ -10,8 +11,13 @@ public class DBConnection {
     private static String username = "root";
     private static String password = "password";
 
-    private DBConnection() {
-
+    private DBConnection() throws SQLException {
+        Properties prop = new Properties();
+        prop.setProperty("user", username);
+        prop.setProperty("password", password);
+        String driver = "com.mysql.jdbc.Driver";
+        String url = "jdbc:mysql://localhost/testpersonne";
+        connection = DriverManager.getConnection(url,prop);
     }
 
     public static Connection getConnection() throws SQLException {
